@@ -1,26 +1,41 @@
 # env files
 .env
-/HardhatV3/.env
+/solidity/.env
 /Frontend/.env.local
+.env
 
 # Node modules
-/HardhatV3/node_modules
+/solidity/node_modules
 
 # Compilation output
-/HardhatV3/dist
+/solidity/dist
 
 # pnpm deploy output
 /HardhatV3bundle
 
 # Hardhat Build Artifacts
-/HardhatV3/artifacts
+/solidity/artifacts
 
 # Hardhat compilation (v2) support directory
-/HardhatV3/cache
+/solidity/cache
 
 # Typechain output
-/HardhatV3/types
+/solidity/types
 
 # Hardhat coverage reports
-/HardhatV3/coverage
+/solidity/coverage
 
+# Hardhat files
+/solidity/cache
+/solidity/artifacts
+
+# TypeChain files
+/solidity/typechain
+/solidity/typechain-types
+
+# solidity-coverage files
+/solidity/coverage
+/solidity//coverage.json
+
+# Hardhat Ignition default folder for deployments against a local node
+/solidity/ignition/deployments/chain-31337

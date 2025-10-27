@@ -43,32 +43,29 @@ Even in crypto, most blockchains **don’t natively automate payments** — user
 
 ---
 
-## 🏗️ Architecture
+## 🧱 System Architecture
 
-+---------------------+ +---------------------------+
-| User Wallet | <-----> | React Frontend |
-| (MetaMask / Flow) | | (subFlow Web Interface) |
-+---------------------+ +-------------+-------------+
-|
-v
-+----------------------+
-| Solidity Contract |
-| (SubFlow.sol on |
-| Flow EVM Testnet) |
-+----------------------+
-|
-v
-+----------------------+
-| Forte Workflow Engine|
-| - Triggers recurring |
-| payment execution |
-| - Calls executePayment|
-+----------------------+
+```text
++---------------------+           +---------------------------+
+|     User Wallet     |  <----->  |      React Frontend       |
+|  (MetaMask / Flow)  |           | (subFlow Web Interface)   |
++---------------------+           +-------------+-------------+
+                                              |
+                                              v
+                                   +----------------------+
+                                   |   Solidity Contract  |
+                                   |     (SubFlow.sol     |
+                                   |   on Flow EVM Testnet)|
+                                   +----------------------+
+                                              |
+                                              v
+                                   +----------------------+
+                                   | Forte Workflow Engine|
+                                   | - Triggers recurring  |
+                                   |   payment execution   |
+                                   | - Calls executePayment|
+                                   +----------------------+
 
-markdown
-Copy code
-
----
 
 ## 🔧 Tech Stack
 
@@ -109,129 +106,132 @@ Copy code
 - It automatically schedules periodic **Action triggers** that call `executePayment()` on the smart contract.
 - These executions happen **on-chain**, ensuring decentralization and reliability — no backend servers or cron jobs required.
 
-**Workflow Example (Pseudocode):**
+##  💧 subFlow — Automate the Flow of Recurring Payments on Flow EVM
+
+### ⚙️ Workflow Example (Pseudocode)
+
 ```js
 onEvent(SubscriptionCreated)
   -> schedule every frequency interval
   -> call contract.executePayment(subscriptionId)
-💻 How to Run Locally
-1️⃣ Clone Repository
-bash
-Copy code
+
+
+## 💻 How to Run Locally
+### 1️⃣ Clone Repository
+```bash
+
 git clone https://github.com/<your-username>/subflow.git
 cd subflow
-2️⃣ Install Dependencies
-bash
-Copy code
+### 2️⃣ Install Dependencies
+```bash
+
 npm install
-3️⃣ Configure Environment
+### 3️⃣ Configure Environment
 Create a .env file:
 
-bash
-Copy code
+```bash
+
 PRIVATE_KEY=<your_flow_evm_testnet_wallet_private_key>
 RPC_URL=https://testnet.evm.flow.com
-4️⃣ Compile & Deploy Contract
-bash
-Copy code
+
+###4️⃣ Compile & Deploy Contract
+```bash
+
 npx hardhat compile
 npx hardhat run scripts/deploy.js --network flowTestnet
-5️⃣ Run Frontend
-bash
-Copy code
+
+###5️⃣ Run Frontend
+```bash
+
 cd frontend
 npm run dev
-Visit http://localhost:5173 (or your port).
+Visit http://localhost:3000 (or your port).
 
-🧪 Testnet Setup
-Faucet
+###🧪 Testnet Setup
+- Faucet
 You can request Flow EVM Testnet tokens here:
 👉 https://evm-testnet.flow.com/faucet
 
-Test NFTs or Tokens
+- Test NFTs or Tokens
 If using Flow EVM ERC20 test tokens:
 
-Tokens are free from the faucet.
+- okens are free from the faucet.
 
-Compatible with standard Solidity ERC20 contracts.
+- Compatible with standard Solidity ERC20 contracts.
 
-No real cost during development.
+- No real cost during development.
 
-🎨 UI Features
-✅ Connect wallet via MetaMask
+### 🎨 UI Features
+- ✅ Connect wallet via MetaMask
 
-💰 Create new subscription
+- 💰 Create new subscription
 
-📅 Set amount and frequency
+- 📅 Set amount and frequency
 
-🔁 Auto payments triggered by Forte
+- 🔁 Auto payments triggered by Forte
 
-❌ Cancel subscription anytime
+- ❌ Cancel subscription anytime
 
-🧾 View transaction & payment history
+- 🧾 View transaction & payment history
 
-🧩 Hackathon Sponsor Tech Used
-Sponsor	Integration
-Flow	Built on Flow EVM Testnet
-Forte	Automated payment execution via Forte Workflows
-Dapper	EVM wallet compatibility
-Find	(Optional) User identity resolution
-Beezie / aiSports / Dune	Optional integrations (not required for core MVP)
+## 🧩 Hackathon Sponsor Tech Used
 
-🕓 Build Timeline (24 Hours)
-Stage	Duration	Key Deliverables
-Setup & Repo	1 hr	Flow EVM config, repo initialized
-Smart Contract	2 hrs	Solidity contract complete
-Deployment	1 hr	Contract on Flow EVM Testnet
-Frontend	4 hrs	React + Wallet + UI screens
-Forte Integration	2 hrs	Automated trigger for payments
-Testing	2 hrs	E2E simulation of recurring payments
-Docs & Demo	2 hrs	Video, README, architecture diagram
-Buffer	10 hrs	Polishing, bug fixes, enhancements
+| **Sponsor** | **Integration** |
+|--------------|-----------------|
+| **Flow** | Built on Flow EVM Testnet |
+| **Forte** | Automated payment execution via Forte Workflows |
+| **Dapper** | EVM wallet compatibility |
+| **Find** | (Optional) User identity resolution |
+| **Beezie / aiSports / Dune** | Optional integrations (not required for core MVP) |
 
-📽️ Demo Walkthrough
-🎥 Demo Video: [link to demo video or Loom recording]
 
-Steps shown:
+---
 
-Connect wallet
+## 📽️ Demo Walkthrough
 
-Create subscription
+🎥 **Demo Video:** [link to demo video or Loom recording]
 
-Forte triggers payment automatically
+**Steps shown:**
+1. Connect wallet  
+2. Create subscription  
+3. Forte triggers payment automatically  
+4. Transaction confirmed on Flow EVM explorer  
+5. Subscription cancelled successfully  
 
-Transaction confirmed on Flow EVM explorer
+---
 
-Subscription cancelled successfully
+## 🛠️ Future Improvements
 
-🛠️ Future Improvements
-💎 NFT-based subscription tiers
+- 💎 NFT-based subscription tiers  
+- 📈 Analytics dashboard with Dune integration  
+- 🤖 AI billing prediction with Beezie API  
+- 💬 Notification system (email / Discord)  
+- 💼 Integration with creators’ platforms (YouTube, Patreon, etc.)
 
-📈 Analytics dashboard with Dune integration
+---
 
-🤖 AI billing prediction with Beezie API
+## 🧑‍💻 Team
 
-💬 Notification system (email / Discord)
+| **Role** | **Name** | **Handle** |
+|-----------|-----------|-------------|
+| Developer | Austin [You] | @<your-handle> |
+| Designer / UI | [Optional teammate] | — |
 
-💼 Integration with creators’ platforms (YouTube, Patreon, etc.)
+---
 
-🧑‍💻 Team
-Role	Name	Handle
-Developer	Austin [You]	@<your-handle>
-Designer / UI	[Optional teammate]	—
+## 🏁 License
 
-🏁 License
-MIT License © 2025 subFlow Team
+**MIT License © 2025 subFlow Team**
 
-🪙 Submission Info (Forte Hacks by Flow)
-Hackathon: Forte Hacks 2025 – Build with Disney, Dune, and Dapper
+---
 
-Category: Best Killer App on Flow / Best Use of Flow Forte Actions & Workflows
+## 🪙 Submission Info (Forte Hacks by Flow)
 
-Prize Eligibility: ✅ Yes
+- **Hackathon:** Forte Hacks 2025 – *Build with Disney, Dune, and Dapper*  
+- **Category:** Best Killer App on Flow / Best Use of Flow Forte Actions & Workflows  
+- **Prize Eligibility:** ✅ Yes  
+- **Project Name:** subFlow  
+- **Tech Used:** Flow EVM, Solidity, React, Forte Workflows  
+- **Deployed On:** Flow EVM Testnet  
 
-Project Name: subFlow
-
-Tech Used: Flow EVM, Solidity, React, Forte Workflows
-
-Deployed On: Flow EVM Testnet
+---
