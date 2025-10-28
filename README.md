@@ -66,7 +66,7 @@ Even in crypto, most blockchains **don’t natively automate payments** — user
                                    | - Calls executePayment|
                                    +----------------------+
 
----
+```
 
 ## 🔧 Tech Stack
 
