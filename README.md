@@ -66,6 +66,7 @@ Even in crypto, most blockchains **don’t natively automate payments** — user
                                    | - Calls executePayment|
                                    +----------------------+
 
+---
 
 ## 🔧 Tech Stack
 
@@ -106,7 +107,7 @@ Even in crypto, most blockchains **don’t natively automate payments** — user
 - It automatically schedules periodic **Action triggers** that call `executePayment()` on the smart contract.
 - These executions happen **on-chain**, ensuring decentralization and reliability — no backend servers or cron jobs required.
 
-##  💧 subFlow — Automate the Flow of Recurring Payments on Flow EVM
+###  💧 subFlow — Automate the Flow of Recurring Payments on Flow EVM
 
 ### ⚙️ Workflow Example (Pseudocode)
 
@@ -114,7 +115,7 @@ Even in crypto, most blockchains **don’t natively automate payments** — user
 onEvent(SubscriptionCreated)
   -> schedule every frequency interval
   -> call contract.executePayment(subscriptionId)
-
+---
 
 ## 💻 How to Run Locally
 ### 1️⃣ Clone Repository
@@ -122,23 +123,28 @@ onEvent(SubscriptionCreated)
 
 git clone https://github.com/<your-username>/subflow.git
 cd subflow
+---
+
 ### 2️⃣ Install Dependencies
 ```bash
 
 npm install
+---
+
 ### 3️⃣ Configure Environment
 Create a .env file:
-
 ```bash
 
 PRIVATE_KEY=<your_flow_evm_testnet_wallet_private_key>
 RPC_URL=https://testnet.evm.flow.com
+---
 
 ###4️⃣ Compile & Deploy Contract
 ```bash
 
 npx hardhat compile
 npx hardhat run scripts/deploy.js --network flowTestnet
+---
 
 ###5️⃣ Run Frontend
 ```bash
@@ -146,6 +152,7 @@ npx hardhat run scripts/deploy.js --network flowTestnet
 cd frontend
 npm run dev
 Visit http://localhost:3000 (or your port).
+---
 
 ###🧪 Testnet Setup
 - Faucet
@@ -155,11 +162,12 @@ You can request Flow EVM Testnet tokens here:
 - Test NFTs or Tokens
 If using Flow EVM ERC20 test tokens:
 
-- okens are free from the faucet.
+- Tokens are free from the faucet.
 
 - Compatible with standard Solidity ERC20 contracts.
 
 - No real cost during development.
+---
 
 ### 🎨 UI Features
 - ✅ Connect wallet via MetaMask
@@ -173,6 +181,7 @@ If using Flow EVM ERC20 test tokens:
 - ❌ Cancel subscription anytime
 
 - 🧾 View transaction & payment history
+---
 
 ## 🧩 Hackathon Sponsor Tech Used
 
@@ -183,7 +192,6 @@ If using Flow EVM ERC20 test tokens:
 | **Dapper** | EVM wallet compatibility |
 | **Find** | (Optional) User identity resolution |
 | **Beezie / aiSports / Dune** | Optional integrations (not required for core MVP) |
-
 
 ---
 
