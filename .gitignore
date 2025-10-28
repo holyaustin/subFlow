@@ -3,6 +3,7 @@
 /solidity/.env
 /Frontend/.env.local
 .env
+.env.local
 
 # Node modules
 /solidity/node_modules
