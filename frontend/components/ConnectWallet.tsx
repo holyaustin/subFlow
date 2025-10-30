@@ -108,7 +108,7 @@ export default function ConnectWallet() {
       {/* Disconnect */}
       <button
         onClick={handleDisconnect}
-        className="px-3 py-1 bg-black text-white rounded-md text-xs"
+        className="px-3 py-1 bg-black text-white rounded-md text-xl font-medium"
       >
         Disconnect
       </button>
