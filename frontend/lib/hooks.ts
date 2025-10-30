@@ -1,62 +1,107 @@
-// lib/hooks.ts
 "use client";
 
-import { useAccount, useContractRead, useContractWrite, usePublicClient } from "wagmi";
+import {
+  useAccount,
+  useReadContract,
+  useWriteContract,
+  usePublicClient,
+} from "wagmi";
 import { SUBFLOW_CONTRACT } from "./contract";
-import { parseEther } from "viem";
+import { toast } from "react-hot-toast";
+import { useState, useEffect } from "react";
+import type { Address } from "viem";
+
+/* -------------------------------------------------------------
+ * 🧩 useIsMounted — prevent hydration mismatch
+ * ------------------------------------------------------------- */
+export function useIsMounted() {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  return mounted;
+}
+
+/* -------------------------------------------------------------
+ * 🔥 Shared Transaction Hook
+ * ------------------------------------------------------------- */
+export function useTransaction() {
+  const [loading, setLoading] = useState(false);
+
+  const runTx = async (fn: () => Promise<any>, successMsg: string) => {
+    try {
+      setLoading(true);
+      toast.loading("Transaction pending...", { id: "tx" });
+      const tx = await fn();
+      const receipt = await tx?.wait?.();
+      if (receipt?.status === "success" || receipt?.status === 1) {
+        toast.success(successMsg, { id: "tx" });
+      } else {
+        toast.error("Transaction reverted!", { id: "tx" });
+      }
+    } catch (err: any) {
+      console.error("Transaction failed:", err);
+      toast.error("Transaction failed to send!", { id: "tx" });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return { runTx, loading };
+}
+
+/* -------------------------------------------------------------
+ * 🔍 Read Hooks (Wagmi v2 syntax)
+ * ------------------------------------------------------------- */
 
 export function useNextId() {
-  return useContractRead({
-    address: SUBFLOW_CONTRACT.address,
+  return useReadContract({
+    address: SUBFLOW_CONTRACT.address as Address,
     abi: SUBFLOW_CONTRACT.abi,
     functionName: "nextId",
-    watch: false,
   });
 }
 
 export function useGetSubscription(id?: number | bigint) {
-  return useContractRead({
-    address: SUBFLOW_CONTRACT.address,
+  const enabled = id !== undefined;
+  return useReadContract({
+    address: SUBFLOW_CONTRACT.address as Address,
     abi: SUBFLOW_CONTRACT.abi,
     functionName: "getSubscription",
-    args: id !== undefined ? [BigInt(id as number)] : undefined,
-    enabled: id !== undefined,
+    args: enabled ? [BigInt(id!)] : undefined,
+    // Wagmi v2 doesn’t have “enabled”; you handle logic outside
   });
 }
 
-/**
- * fetchUserSubscriptions - usePublicClient-based helper to read all subscriptions for the connected account
- * NOTE: Client-side only. This loops from 1..nextId-1 and is OK for test/demo. For production use an indexer.
- */
+/* -------------------------------------------------------------
+ * 🧭 Fetch all user subscriptions via publicClient
+ * ------------------------------------------------------------- */
 export function useFetchUserSubscriptions() {
   const publicClient = usePublicClient();
   const { address } = useAccount();
 
   async function fetchAll() {
-    if (!address) return [];
-    // read nextId
+    if (!address || !publicClient) return [];
     const nextIdRes = await publicClient.readContract({
-      address: SUBFLOW_CONTRACT.address,
+      address: SUBFLOW_CONTRACT.address as Address,
       abi: SUBFLOW_CONTRACT.abi,
       functionName: "nextId",
     });
     const nextId = Number(nextIdRes as bigint);
-    const result: Array<{ id: number; subscription: any }> = [];
+    const result: any[] = [];
 
     for (let i = 1; i < nextId; i++) {
       try {
         const sub = await publicClient.readContract({
-          address: SUBFLOW_CONTRACT.address,
+          address: SUBFLOW_CONTRACT.address as Address,
           abi: SUBFLOW_CONTRACT.abi,
           functionName: "getSubscription",
           args: [BigInt(i)],
         });
         const subscriber = (sub as any)[0] as string;
-        if (subscriber.toLowerCase() === address?.toLowerCase()) {
+        if (subscriber.toLowerCase() === address.toLowerCase()) {
           result.push({ id: i, subscription: sub });
         }
-      } catch (err) {
-        // ignore missing / reverted id
+      } catch {
+        // ignore failed reads
       }
     }
     return result;
@@ -65,55 +110,55 @@ export function useFetchUserSubscriptions() {
   return { fetchAll };
 }
 
-/* ========== Write hooks ========== */
+/* -------------------------------------------------------------
+ * ✍️ Write Hooks (with Transaction Feedback)
+ * ------------------------------------------------------------- */
+function useWriteWithTx(functionName: string) {
+  const { writeContractAsync, ...rest } = useWriteContract();
+  const tx = useTransaction();
+
+  async function safeWrite(config: any) {
+    return await writeContractAsync({
+      address: SUBFLOW_CONTRACT.address as Address,
+      abi: SUBFLOW_CONTRACT.abi,
+      functionName,
+      ...config,
+    });
+  }
+
+  return { writeContractAsync: safeWrite, ...rest, ...tx };
+}
+
+/* ---------- User-facing functions ---------- */
 export function useCreateSubscription() {
-  return useContractWrite({
-    address: SUBFLOW_CONTRACT.address,
-    abi: SUBFLOW_CONTRACT.abi,
-    functionName: "createSubscription",
-  });
+  return useWriteWithTx("createSubscription");
 }
-
 export function useTopUp() {
-  return useContractWrite({
-    address: SUBFLOW_CONTRACT.address,
-    abi: SUBFLOW_CONTRACT.abi,
-    functionName: "topUp",
-  });
+  return useWriteWithTx("topUp");
 }
-
 export function useExecutePayment() {
-  return useContractWrite({
-    address: SUBFLOW_CONTRACT.address,
-    abi: SUBFLOW_CONTRACT.abi,
-    functionName: "executePayment",
-  });
+  return useWriteWithTx("executePayment");
 }
-
 export function useCancelSubscription() {
-  return useContractWrite({
-    address: SUBFLOW_CONTRACT.address,
-    abi: SUBFLOW_CONTRACT.abi,
-    functionName: "cancelSubscription",
-  });
+  return useWriteWithTx("cancelSubscription");
 }
 
-/* admin */
+/* ---------- Admin functions ---------- */
 export function useAddExecutor() {
-  return useContractWrite({ address: SUBFLOW_CONTRACT.address, abi: SUBFLOW_CONTRACT.abi, functionName: "addExecutor" });
+  return useWriteWithTx("addExecutor");
 }
 export function useRemoveExecutor() {
-  return useContractWrite({ address: SUBFLOW_CONTRACT.address, abi: SUBFLOW_CONTRACT.abi, functionName: "removeExecutor" });
+  return useWriteWithTx("removeExecutor");
 }
 export function usePause() {
-  return useContractWrite({ address: SUBFLOW_CONTRACT.address, abi: SUBFLOW_CONTRACT.abi, functionName: "pause" });
+  return useWriteWithTx("pause");
 }
 export function useUnpause() {
-  return useContractWrite({ address: SUBFLOW_CONTRACT.address, abi: SUBFLOW_CONTRACT.abi, functionName: "unpause" });
+  return useWriteWithTx("unpause");
 }
 export function useRescueNative() {
-  return useContractWrite({ address: SUBFLOW_CONTRACT.address, abi: SUBFLOW_CONTRACT.abi, functionName: "rescueNative" });
+  return useWriteWithTx("rescueNative");
 }
 export function useTransferOwnership() {
-  return useContractWrite({ address: SUBFLOW_CONTRACT.address, abi: SUBFLOW_CONTRACT.abi, functionName: "transferOwnership" });
+  return useWriteWithTx("transferOwnership");
 }

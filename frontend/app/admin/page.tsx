@@ -1,75 +1,181 @@
-// app/admin/page.tsx
 "use client";
 
-import React, { useEffect, useState } from "react";
-import { useAccount } from "wagmi";
+import React, { useState } from "react";
+import { toast } from "react-hot-toast";
+import { useAddExecutor, useRemoveExecutor, useRescueNative, usePause, useUnpause, useTransferOwnership } from "@/lib/hooks";
+import { SUBFLOW_CONTRACT } from "@/lib/contract";
 import { motion } from "framer-motion";
 
-const ADMIN_ADDRESS = "0x2c3b2B2325610a6814f2f822D0bF4DAB8CF16e16".toLowerCase();
-
 export default function AdminPage() {
-  const { address, isConnected } = useAccount();
-  const [isAdmin, setIsAdmin] = useState(false);
+  const [executorAddr, setExecutorAddr] = useState("");
+  const [rescueAmount, setRescueAmount] = useState("");
+  const [newOwner, setNewOwner] = useState("");
 
-  useEffect(() => {
-    if (address && isConnected) {
-      setIsAdmin(address.toLowerCase() === ADMIN_ADDRESS);
+  const addExecutor = useAddExecutor();
+  const removeExecutor = useRemoveExecutor();
+  const rescue = useRescueNative();
+  const pause = usePause();
+  const unpause = useUnpause();
+  const transferOwnership = useTransferOwnership();
+
+  const handleTx = async (fn: () => Promise<any>, msg: string) => {
+    try {
+      toast.loading("Processing...", { id: "tx" });
+      const tx = await fn();
+      const receipt = await tx?.wait?.();
+      if (receipt?.status === "success" || receipt?.status === 1) {
+        toast.success(msg, { id: "tx" });
+      } else {
+        toast.error("Transaction failed!", { id: "tx" });
+      }
+    } catch (err: any) {
+      console.error("TX failed", err);
+      toast.error("Error: " + (err?.shortMessage || err?.message), { id: "tx" });
     }
-  }, [address, isConnected]);
+  };
 
-  if (!isConnected) {
-    return (
-      <main className="flex flex-col items-center justify-center min-h-screen bg-gray-100 px-4">
-        <p className="text-lg text-gray-700">🔐 Please connect your wallet to continue.</p>
-      </main>
+  // ✅ Fixed calls below:
+  const onAddExecutor = async () => {
+    if (!executorAddr) return toast.error("Enter executor address");
+    await handleTx(
+      () =>
+        addExecutor.writeContractAsync({
+          address: SUBFLOW_CONTRACT.address,
+          abi: SUBFLOW_CONTRACT.abi,
+          functionName: "addExecutor",
+          args: [executorAddr],
+        }),
+      "Executor added!"
     );
-  }
+  };
 
-  if (!isAdmin) {
-    return (
-      <main className="flex flex-col items-center justify-center min-h-screen bg-gray-100 px-4">
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="max-w-lg bg-white rounded-xl shadow-lg p-6 text-center"
-        >
-          <h2 className="text-2xl font-semibold text-red-600 mb-3">Access Denied</h2>
-          <p className="text-gray-700">
-            You are not authorized to view this page. Only the admin wallet can access this section.
-          </p>
-        </motion.div>
-      </main>
+  const onRemoveExecutor = async () => {
+    if (!executorAddr) return toast.error("Enter executor address");
+    await handleTx(
+      () =>
+        removeExecutor.writeContractAsync({
+          address: SUBFLOW_CONTRACT.address,
+          abi: SUBFLOW_CONTRACT.abi,
+          functionName: "removeExecutor",
+          args: [executorAddr],
+        }),
+      "Executor removed!"
     );
-  }
+  };
+
+  const onRescue = async () => {
+    await handleTx(
+      () =>
+        rescue.writeContractAsync({
+          address: SUBFLOW_CONTRACT.address,
+          abi: SUBFLOW_CONTRACT.abi,
+          functionName: "rescueNative",
+          args: [BigInt(rescueAmount || "0")],
+        }),
+      "Native token rescued!"
+    );
+  };
+
+  const onPause = async () => {
+    await handleTx(
+      () =>
+        pause.writeContractAsync({
+          address: SUBFLOW_CONTRACT.address,
+          abi: SUBFLOW_CONTRACT.abi,
+          functionName: "pause",
+        }),
+      "Contract paused!"
+    );
+  };
+
+  const onUnpause = async () => {
+    await handleTx(
+      () =>
+        unpause.writeContractAsync({
+          address: SUBFLOW_CONTRACT.address,
+          abi: SUBFLOW_CONTRACT.abi,
+          functionName: "unpause",
+        }),
+      "Contract unpaused!"
+    );
+  };
+
+  const onTransferOwnership = async () => {
+    if (!newOwner) return toast.error("Enter new owner address");
+    await handleTx(
+      () =>
+        transferOwnership.writeContractAsync({
+          address: SUBFLOW_CONTRACT.address,
+          abi: SUBFLOW_CONTRACT.abi,
+          functionName: "transferOwnership",
+          args: [newOwner],
+        }),
+      "Ownership transferred!"
+    );
+  };
 
   return (
-    <main className="min-h-screen bg-gray-50 py-16 px-6 flex flex-col items-center">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="w-full max-w-4xl bg-white rounded-xl shadow-lg p-8"
-      >
-        <h1 className="text-3xl md:text-4xl font-bold text-center text-blue-600 mb-6">
-          Admin Dashboard
-        </h1>
-        <p className="text-gray-700 text-lg text-center mb-8">
-          Welcome, Admin! You can manage SubFlow settings, oversee payments, and monitor system logs here.
-        </p>
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4 }}
+      className="max-w-2xl mx-auto p-6 bg-white rounded shadow space-y-6 mt-10"
+    >
+      <h2 className="text-2xl font-semibold mb-4">Admin Controls</h2>
 
-        {/* Example Admin Controls */}
-        <div className="grid gap-6 md:grid-cols-2">
-          <div className="bg-gray-100 p-6 rounded-xl">
-            <h3 className="text-xl font-semibold text-red-600 mb-2">Subscription Overview</h3>
-            <p className="text-gray-600">Monitor active subscriptions, users, and top-ups.</p>
-          </div>
-
-          <div className="bg-gray-100 p-6 rounded-xl">
-            <h3 className="text-xl font-semibold text-blue-600 mb-2">System Settings</h3>
-            <p className="text-gray-600">Adjust payment intervals or contract parameters securely.</p>
-          </div>
+      {/* Executor Management */}
+      <div className="space-y-3">
+        <input
+          value={executorAddr}
+          onChange={(e) => setExecutorAddr(e.target.value)}
+          placeholder="Executor address"
+          className="w-full border px-3 py-2 rounded"
+        />
+        <div className="flex gap-2">
+          <button onClick={onAddExecutor} className="bg-green-600 text-white px-3 py-1 rounded">
+            Add Executor
+          </button>
+          <button onClick={onRemoveExecutor} className="bg-red-600 text-white px-3 py-1 rounded">
+            Remove Executor
+          </button>
         </div>
-      </motion.div>
-    </main>
+      </div>
+
+      {/* Pause / Unpause */}
+      <div className="flex gap-2">
+        <button onClick={onPause} className="bg-yellow-600 text-white px-3 py-1 rounded">
+          Pause
+        </button>
+        <button onClick={onUnpause} className="bg-blue-600 text-white px-3 py-1 rounded">
+          Unpause
+        </button>
+      </div>
+
+      {/* Rescue Native */}
+      <div className="space-y-3">
+        <input
+          value={rescueAmount}
+          onChange={(e) => setRescueAmount(e.target.value)}
+          placeholder="Rescue amount (wei)"
+          className="w-full border px-3 py-2 rounded"
+        />
+        <button onClick={onRescue} className="bg-purple-600 text-white px-3 py-1 rounded">
+          Rescue Native
+        </button>
+      </div>
+
+      {/* Transfer Ownership */}
+      <div className="space-y-3">
+        <input
+          value={newOwner}
+          onChange={(e) => setNewOwner(e.target.value)}
+          placeholder="New owner address"
+          className="w-full border px-3 py-2 rounded"
+        />
+        <button onClick={onTransferOwnership} className="bg-gray-800 text-white px-3 py-1 rounded">
+          Transfer Ownership
+        </button>
+      </div>
+    </motion.div>
   );
 }

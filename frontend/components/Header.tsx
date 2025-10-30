@@ -1,79 +1,86 @@
-// components/Header.tsx
 "use client";
 
 import React, { useState } from "react";
 import Link from "next/link";
 import { Menu, X } from "lucide-react";
 import ConnectWallet from "./ConnectWallet";
+import { useIsMounted } from "@/lib/hooks";
 
 export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const toggleMenu = () => setMenuOpen((v) => !v);
+  const mounted = useIsMounted();
 
-  const toggleMenu = () => setMenuOpen((prev) => !prev);
+  if (!mounted) return null; // prevents SSR mismatch
 
   return (
     <header className="bg-red-600 text-white shadow-md">
-      <div className="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
-        {/* Logo and name */}
-        <div className="flex items-center space-x-2">
+      <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+        {/* Logo + title */}
+        <div className="flex items-center gap-3">
           <img
-            src="https://cryptologos.cc/logos/flow-flow-logo.png"
+            src="/logo.png"
             alt="subFlow logo"
-            className="w-8 h-8"
+            className="w-16 h-16 object-cover"
           />
-          <Link href="/" className="text-xl font-bold tracking-wide">
+          <Link href="/" className="text-3xl font-bold">
             subFlow
           </Link>
         </div>
 
-        {/* Desktop nav links */}
-        <nav className="hidden md:flex items-center space-x-6">
-          <Link href="/" className="hover:text-blue-200">
-            Home
-          </Link>
-          <Link href="/about" className="hover:text-blue-200">
+        {/* Desktop nav */}
+        <nav className="hidden md:flex items-center gap-6">
+          <Link href="/about" className="hover:text-gray-200">
             About
           </Link>
-          <Link href="/create" className="hover:text-blue-200">
+          <Link href="/create" className="hover:text-gray-200">
             Create
           </Link>
-          <Link href="/dashboard" className="hover:text-blue-200">
+          <Link href="/dashboard" className="hover:text-gray-200">
             Dashboard
+          </Link>
+          <Link href="/analytics" className="hover:text-gray-200">
+            Analytics
+          </Link>
+          <Link href="/admin" className="hover:text-gray-200">
+            Admin
           </Link>
         </nav>
 
-        {/* Wallet button */}
         <div className="hidden md:block">
           <ConnectWallet />
         </div>
 
-        {/* Mobile menu button */}
         <button
+          className="md:hidden"
           onClick={toggleMenu}
-          className="md:hidden focus:outline-none text-white"
+          aria-label="Toggle menu"
         >
-          {menuOpen ? <X size={24} /> : <Menu size={24} />}
+          {menuOpen ? <X size={22} /> : <Menu size={22} />}
         </button>
       </div>
 
-      {/* Mobile dropdown menu */}
       {menuOpen && (
-        <div className="md:hidden bg-red-700 border-t border-red-500 px-4 py-3 space-y-3">
-          <Link href="/" className="block hover:text-blue-200" onClick={() => setMenuOpen(false)}>
-            Home
-          </Link>
-          <Link href="/about" className="block hover:text-blue-200" onClick={() => setMenuOpen(false)}>
-            About
-          </Link>
-          <Link href="/create" className="block hover:text-blue-200" onClick={() => setMenuOpen(false)}>
-            Create
-          </Link>
-          <Link href="/dashboard" className="block hover:text-blue-200" onClick={() => setMenuOpen(false)}>
-            Dashboard
-          </Link>
-
-          <div className="border-t border-red-500 pt-3">
-            <ConnectWallet />
+        <div className="md:hidden bg-red-700 px-4 py-3 border-t border-red-500">
+          <div className="flex flex-col gap-3">
+            <Link href="/about" onClick={() => setMenuOpen(false)} className="block">
+              About
+            </Link>
+            <Link href="/create" onClick={() => setMenuOpen(false)} className="block">
+              Create
+            </Link>
+            <Link href="/dashboard" onClick={() => setMenuOpen(false)} className="block">
+              Dashboard
+            </Link>
+            <Link href="/analytics" onClick={() => setMenuOpen(false)} className="block">
+              Analytics
+            </Link>
+            <Link href="/admin" onClick={() => setMenuOpen(false)} className="block">
+              Admin
+            </Link>
+            <div className="pt-3 border-t border-red-500">
+              <ConnectWallet />
+            </div>
           </div>
         </div>
       )}
