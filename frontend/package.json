@@ -13,6 +13,7 @@
     "@tanstack/react-query": "^5.90.5",
     "@wagmi/chains": "^1.8.0",
     "@wagmi/core": "^2.22.1",
+    "dotenv": "^17.2.3",
     "ethers": "^6.15.0",
     "framer-motion": "^12.23.24",
     "lucide-react": "^0.548.0",
