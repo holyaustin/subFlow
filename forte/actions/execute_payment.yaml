@@ -1,0 +1,34 @@
+# forte/actions/execute_payment.yaml
+version: 0.1.0
+name: execute_payment_workflow
+trigger:
+  event:
+    address: "0xe4741b7FF9c69904A6616AD8a61937F97d947331" # Flow EVM contract address
+    eventName: "SubscriptionCreated"
+steps:
+  - name: sign_evm_tx
+    action: HTTP.Post
+    inputs:
+      url: "https://subflow-agent.vercel.app/api/sign"
+      headers:
+        Content-Type: "application/json"
+      body:
+        secret: "${env.AGENT_SECRET}"
+        subscriptionId: "${event.subscriptionId}"
+    outputs:
+      rlpBase64: "${response.rlpBase64}"
+      from: "${response.from}"
+
+  - name: decode_and_run
+    action: Cadence.Transaction
+    inputs:
+      script: "./cadence/subFlow/cadence/contracts/execute_evm_tx.cdc" 
+      arguments:
+        rlpTx: |
+          import "base64"
+          let bytes = base64.decodeBytes("${steps.sign_evm_tx.outputs.rlpBase64}")
+          return bytes
+        coinbase: |
+          import Crypto
+          let addr: [UInt8; 20] = Crypto.hexToBytes("${steps.sign_evm_tx.outputs.from}")
+          return addr

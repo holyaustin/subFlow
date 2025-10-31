@@ -1,9 +1,9 @@
 {
 	"contracts": {
-		"Counter": {
-			"source": "cadence/contracts/Counter.cdc",
+		"EVM": {
+			"source": "cadence/contracts/execute_evm_tx.cdc",
 			"aliases": {
-				"testing": "0000000000000007"
+				"testnet": "0x8c5303eaa26202d6"
 			}
 		}
 	},
@@ -21,5 +21,6 @@
 				"location": "emulator-account.pkey"
 			}
 		}
+		
 	}
 }
