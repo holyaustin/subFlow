@@ -40,3 +40,5 @@
 
 # Hardhat Ignition default folder for deployments against a local node
 /solidity/ignition/deployments/chain-31337
+
+test-account.pkey

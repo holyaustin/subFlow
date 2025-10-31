@@ -1,9 +1,9 @@
 {
 	"contracts": {
-		"EVM": {
-			"source": "cadence/contracts/execute_evm_tx.cdc",
+		"Counter": {
+			"source": "cadence/contracts/Counter.cdc",
 			"aliases": {
-				"testnet": "0x8c5303eaa26202d6"
+				"testing": "0000000000000007"
 			}
 		}
 	},
@@ -28,6 +28,5 @@
 				"location": "test-account.pkey"
 			}
 		}
-		
 	}
 }

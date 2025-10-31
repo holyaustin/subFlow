@@ -1,0 +1,55 @@
+name: Deploy Flow EVM Bridge
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    env:
+      FLOW_TESTNET_PRIVATE_KEY: ${{ secrets.FLOW_TESTNET_PRIVATE_KEY }}
+      FLOW_TESTNET_ADDRESS: ${{ secrets.FLOW_TESTNET_ADDRESS }}
+      EXECUTOR_PRIVATE_KEY: ${{ secrets.EXECUTOR_PRIVATE_KEY }}
+      SUBFLOW_CONTRACT: ${{ secrets.SUBFLOW_CONTRACT }}
+      AGENT_SECRET: ${{ secrets.AGENT_SECRET }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build Next.js app
+        run: npm run build
+
+      - name: Install Flow CLI
+        run: |
+          curl -L https://flow-cli.fly.dev/install.sh | bash
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+      - name: Verify Flow account
+        run: flow accounts get $FLOW_TESTNET_ADDRESS --network testnet
+
+      - name: Run Flow EVM transaction (example)
+        run: |
+          echo "🚀 Running EVM transaction..."
+          flow transactions send cadence/contracts/execute_evm_tx.cdc \
+            --network testnet \
+            --signer testnet-account \
+            --gas-limit 1000 || true
+
+      - name: Deploy Next.js to Vercel
+        uses: amondnet/vercel-action@v25
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+          working-directory: .
