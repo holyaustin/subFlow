@@ -39,9 +39,11 @@ export default function Header() {
           <Link href="/dashboard" className="hover:text-gray-200">
             Dashboard
           </Link>
+          {/** 
           <Link href="/analytics" className="hover:text-gray-200">
             Analytics
           </Link>
+          */}
           <Link href="/admin" className="hover:text-gray-200">
             Admin
           </Link>
