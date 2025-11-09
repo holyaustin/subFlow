@@ -1,37 +1,32 @@
 // cadence/execute_evm_tx.cdc
-//
-// Execute a pre-signed EVM transaction (RLP encoded) via Flow EVM.
-// Ensure this is deployed or run against the Flow Testnet.
-//
-// Docs: https://developers.flow.com/blockchain-development-tutorials/cross-vm-apps/direct-calls
+// Execute a pre-signed EVM transaction via Flow EVM service.
+// Import uses the testnet service address mapping from flow.json
 
 import EVM from 0x8c5303eaa26202d6
 
-transaction(rlpTx: [UInt8], coinbaseBytes: [UInt8; 20]) {
+transaction(rlpTx: [UInt8], coinbase: [UInt8; 20]) {
+  prepare(signer: &Account) {
+    // Convert coinbase byte array into EVMAddress
+    let coinbaseAddr = EVM.EVMAddress(bytes: coinbase)
 
-    prepare(signer: &Account) {
-        log("🚀 Starting execution of EVM transaction via Flow EVM bridge...")
+    // Run the signed RLP transaction on Flow EVM
+    let runResult = EVM.run(tx: rlpTx, coinbase: coinbaseAddr)
 
-        // Convert bytes to an EVM address object
-        let coinbaseAddr = EVM.EVMAddress(bytes: coinbaseBytes)
+    // Logging for debugging
+    log("EVM.run status: ".concat(runResult.status.toString()))
+    log("EVM.run gasUsed: ".concat(runResult.gasUsed.toString()))
 
-        // Run the signed RLP transaction
-        let result = EVM.run(
-            tx: rlpTx,
-            coinbase: coinbaseAddr
-        )
+    // Decide what counts as success for your workflow:
+    // - If you want to require full success, assert successful:
+    assert(
+      runResult.status == EVM.Status.successful,
+      message: "EVM.run did not complete successfully: ".concat(runResult.status.toString())
+    )
 
-        log("EVM.run completed. Status: ".concat(result.status.toString()))
-        log("EVM gas used: ".concat(result.gasUsed.toString()))
+    // Optional: you can also emit events or write state here if needed.
+  }
 
-        // Optional: assert for workflow safety
-        assert(
-            result.status == EVM.Status.successful,
-            message: "❌ EVM transaction failed! Status: ".concat(result.status.toString())
-        )
-    }
-
-    execute {
-        log("✅ EVM transaction executed successfully on Flow EVM Testnet.")
-    }
+  execute {
+    // nothing here: we did the work in prepare()
+  }
 }

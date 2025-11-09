@@ -1,33 +1,22 @@
 {
-	"contracts": {
-		"EVM": {
-			"source": "cadence/contracts/execute_evm_tx.cdc",
-			"aliases": {
-				"testnet": "0x8c5303eaa26202d6"
-			}
-		}
-	},
-	"networks": {
-		"emulator": "127.0.0.1:3569",
-		"mainnet": "access.mainnet.nodes.onflow.org:9000",
-		"testing": "127.0.0.1:3569",
-		"testnet": "access.devnet.nodes.onflow.org:9000"
-	},
-	"accounts": {
-		"emulator-account": {
-			"address": "f8d6e0586b0a20c7",
-			"key": {
-				"type": "file",
-				"location": "emulator-account.pkey"
-			}
-		},
-		"test-account": {
-			"address": "b57b62d33ca6ecf2",
-			"key": {
-				"type": "file",
-				"location": "test-account.pkey"
-			}
-		}
-		
-	}
+  "contracts": {
+    "EVM": {
+      "aliases": {
+        "testnet": "0x8c5303eaa26202d6"
+      }
+    },
+
+    "SubFlow": { 
+      "source": "cadence/contracts/SubFlow.cdc", 
+      "aliases": { "testnet": "0x..."} 
+    }
+  
+  },
+
+  
+  "networks": {
+    "testnet": "access.devnet.nodes.onflow.org:9000",
+    "mainnet": "access.mainnet.nodes.onflow.org:9000",
+    "emulator": "127.0.0.1:3569"
+  }
 }
